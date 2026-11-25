@@ -1,0 +1,106 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Internships</title>
+    <link rel="stylesheet" href="../style.css">
+
+    <style>
+        body { background:#0b1020; color:#fff; font-family:Arial,sans-serif; }
+        .header { text-align:center; padding:25px; background:#18233f; }
+        h1,h2,h3 { color:#fff !important; }
+        p { color:#e2e8f0 !important; }
+        .container { max-width:1100px; margin:35px auto; padding:20px; }
+        .internship-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:22px; }
+        .internship-card { background:#1b2745; padding:25px; border:1px solid #6473a0; border-radius:18px; }
+        .internship-card h2 { color:#c4b5fd !important; }
+        .internship-card button { background:#8b5cf6; color:white; border:0; padding:12px 22px; border-radius:9px; cursor:pointer; font-weight:bold; }
+        .internship-card button:hover { background:#6d28d9; }
+        a { color:#c4b5fd; }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <h1>Available Internships</h1>
+    <p>Explore opportunities and start your career journey</p>
+</header>
+
+<div class="container">
+    <div class="internship-grid">
+
+        <div class="internship-card">
+            <h2>Web Development Intern</h2>
+            <p>Learn website development using HTML, CSS and JavaScript.</p>
+            <p><b>Duration:</b> 2 Months</p>
+            <p><b>Mode:</b> Online</p>
+            <button onclick="applyNow('Web Development Intern')">Apply Now</button>
+        </div>
+
+        <div class="internship-card">
+            <h2>Python Developer Intern</h2>
+            <p>Work with Python programming and beginner projects.</p>
+            <p><b>Duration:</b> 3 Months</p>
+            <p><b>Mode:</b> Online</p>
+            <button onclick="applyNow('Python Developer Intern')">Apply Now</button>
+        </div>
+
+        <div class="internship-card">
+            <h2>Data Analyst Intern</h2>
+            <p>Explore data analysis and basic data visualization.</p>
+            <p><b>Duration:</b> 2 Months</p>
+            <p><b>Mode:</b> Hybrid</p>
+            <button onclick="applyNow('Data Analyst Intern')">Apply Now</button>
+        </div>
+
+        <div class="internship-card">
+            <h2>Java Developer Intern</h2>
+            <p>Improve your programming skills with Java projects.</p>
+            <p><b>Duration:</b> 3 Months</p>
+            <p><b>Mode:</b> Online</p>
+            <button onclick="applyNow('Java Developer Intern')">Apply Now</button>
+        </div>
+
+    </div>
+    <p style="text-align:center;margin-top:30px;">
+        <a href="student-dashboard.html">← Back to Dashboard</a>
+    </p>
+</div>
+
+<script>
+function applyNow(title) {
+    const student = JSON.parse(localStorage.getItem("loggedInStudent"));
+
+    if (!student) {
+        alert("Please login first!");
+        window.location.href = "student.html";
+        return;
+    }
+
+    let applications = JSON.parse(localStorage.getItem("applications")) || [];
+
+    const alreadyApplied = applications.some(app =>
+        app.email === student.email && app.internship === title
+    );
+
+    if (alreadyApplied) {
+        alert("You have already applied for this internship!");
+        return;
+    }
+
+    applications.push({
+        name: student.name,
+        email: student.email,
+        internship: title,
+        status: "Pending"
+    });
+
+    localStorage.setItem("applications", JSON.stringify(applications));
+    alert("Application submitted successfully!");
+}
+</script>
+
+</body>
+</html>

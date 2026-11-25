@@ -1,0 +1,83 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications</title>
+    <link rel="stylesheet" href="../style.css">
+
+    <style>
+        body { background:#0b1020; color:#fff; font-family:Arial,sans-serif; }
+        header { text-align:center; padding:25px; background:#18233f; }
+        h1,h2,h3 { color:#fff !important; }
+        p { color:#e2e8f0 !important; }
+        .container { max-width:900px; margin:35px auto; padding:20px; }
+        .notification { background:#1b2745; padding:25px; margin-bottom:18px; border-radius:15px; border-left:5px solid #8b5cf6; }
+        .notification h3 { color:#c4b5fd !important; }
+        .notification.approved { border-left-color:#22c55e; }
+        .notification.rejected { border-left-color:#ef4444; }
+        .notification.pending { border-left-color:#f59e0b; }
+        a { color:#c4b5fd; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Notifications</h1>
+    <p>Stay updated about your internship applications</p>
+</header>
+
+<div class="container">
+    <div id="notificationList"></div>
+    <p><a href="student-dashboard.html">← Back to Dashboard</a></p>
+</div>
+
+<script>
+const student = JSON.parse(localStorage.getItem("loggedInStudent"));
+
+if (!student) {
+    window.location.replace("student.html");
+} else {
+    const applications = JSON.parse(localStorage.getItem("applications")) || [];
+
+    const myApplications = applications.filter(app =>
+        app.email === student.email
+    );
+
+    const list = document.getElementById("notificationList");
+
+    if (myApplications.length === 0) {
+        list.innerHTML = "<h2>No Notifications</h2><p>You have no application updates yet.</p>";
+    } else {
+        myApplications.forEach(app => {
+            const status = app.status || "Pending";
+
+            const card = document.createElement("div");
+            card.className = "notification " + status.toLowerCase();
+
+            const heading = document.createElement("h3");
+            heading.textContent = "Internship: " + app.internship;
+
+            const message = document.createElement("p");
+
+            if (status === "Approved") {
+                message.textContent = "Congratulations! Your internship application has been approved.";
+            } else if (status === "Rejected") {
+                message.textContent = "Your internship application was not approved.";
+            } else {
+                message.textContent = "Your application is pending. Please wait for the admin's decision.";
+            }
+
+            const statusText = document.createElement("p");
+            statusText.textContent = "Current Status: " + status;
+
+            card.append(heading, message, statusText);
+            list.appendChild(card);
+        });
+    }
+}
+</script>
+
+</body>
+</html>

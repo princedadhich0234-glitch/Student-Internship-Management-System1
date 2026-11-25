@@ -1,0 +1,432 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="../style.css">
+
+    <script>
+        if (sessionStorage.getItem("adminLoggedIn") !== "true") {
+            window.location.replace("admin-login.html");
+        }
+    </script>
+
+    <style>
+        body {
+            background: #0b1020;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        header {
+            background: #18233f;
+            padding: 25px;
+            text-align: center;
+            border-bottom: 2px solid #8b5cf6;
+        }
+
+        h1, h2, h3 { color: white !important; }
+        p { color: #e2e8f0 !important; }
+
+        .container {
+            max-width: 1150px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .panel {
+            background: #1b2745;
+            border: 1px solid #46547a;
+            padding: 25px;
+            border-radius: 18px;
+            margin-bottom: 30px;
+        }
+
+        .panel h2 {
+            color: #c4b5fd !important;
+            margin-top: 0;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 13px;
+            margin: 9px 0 17px;
+            border: 1px solid #6473a0;
+            border-radius: 9px;
+            background: #263453;
+            color: white;
+            font-size: 15px;
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: #cbd5e1;
+        }
+
+        label {
+            color: #c4b5fd;
+            font-weight: bold;
+        }
+
+        button {
+            padding: 11px 17px;
+            border: none;
+            border-radius: 8px;
+            background: #8b5cf6;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 4px;
+        }
+
+        button:hover { background: #6d28d9; }
+
+        .delete-btn { background: #dc2626; }
+        .delete-btn:hover { background: #991b1b; }
+
+        .approve-btn { background: #16a34a; }
+        .reject-btn { background: #dc2626; }
+
+        .job-card {
+            background: #263453;
+            border: 1px solid #6473a0;
+            padding: 20px;
+            border-radius: 14px;
+            margin: 15px 0;
+        }
+
+        .job-card h3 { color: #c4b5fd !important; }
+
+        .status {
+            display: inline-block;
+            padding: 7px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status.closed {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .table-wrapper { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 650px;
+        }
+
+        th, td {
+            border: 1px solid #46547a;
+            padding: 13px;
+            text-align: left;
+            color: white;
+        }
+
+        th {
+            background: #34205d;
+            color: #ffffff;
+        }
+
+        td { background: #1b2745; }
+
+        .logout {
+            background: #dc2626;
+        }
+
+        @media(max-width: 600px) {
+            .container { padding: 12px; }
+            .panel { padding: 17px; }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Admin Dashboard</h1>
+    <p>Manage internships and student applications</p>
+    <button class="logout" onclick="logoutAdmin()">Logout</button>
+</header>
+
+<div class="container">
+
+    <!-- ADD INTERNSHIP -->
+    <section class="panel">
+        <h2>➕ Add New Internship</h2>
+        <p>Enter the internship details to publish it for students.</p>
+
+        <form id="internshipForm">
+
+            <label>Job / Internship Title</label>
+            <input type="text" id="jobTitle"
+                   placeholder="Example: Web Developer Intern" required>
+
+            <label>Job Description</label>
+            <textarea id="jobDescription"
+                      placeholder="Describe the internship..."
+                      rows="4" required></textarea>
+
+            <label>Salary / Stipend</label>
+            <input type="text" id="jobSalary"
+                   placeholder="Example: ₹10,000 per month" required>
+
+            <label>Duration</label>
+            <input type="text" id="jobDuration"
+                   placeholder="Example: 3 Months" required>
+
+            <label>Available Seats</label>
+            <input type="number" id="jobSeats"
+                   min="1" placeholder="Example: 5" required>
+
+            <label>Work Mode</label>
+            <select id="jobMode" required>
+                <option value="">Select Work Mode</option>
+                <option value="Online">Online</option>
+                <option value="Offline">Offline</option>
+                <option value="Hybrid">Hybrid</option>
+            </select>
+
+            <label>Availability</label>
+            <select id="jobAvailability" required>
+                <option value="Available">Available</option>
+                <option value="Closed">Closed</option>
+            </select>
+
+            <button type="submit">Publish Internship</button>
+
+        </form>
+    </section>
+
+    <!-- MANAGE INTERNSHIPS -->
+    <section class="panel">
+        <h2>📌 Manage Internships</h2>
+        <div id="internshipList"></div>
+    </section>
+
+    <!-- APPLICATIONS -->
+    <section class="panel">
+        <h2>📋 Student Applications</h2>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Email</th>
+                        <th>Internship</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="applicationTable"></tbody>
+            </table>
+        </div>
+    </section>
+
+</div>
+
+<script>
+    // LOGOUT
+    function logoutAdmin() {
+        sessionStorage.removeItem("adminLoggedIn");
+        window.location.href = "admin-login.html";
+    }
+
+    // ADD NEW INTERNSHIP
+    document.getElementById("internshipForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        let internships = JSON.parse(localStorage.getItem("internships")) || [];
+
+        const job = {
+            id: Date.now(),
+            title: document.getElementById("jobTitle").value.trim(),
+            description: document.getElementById("jobDescription").value.trim(),
+            salary: document.getElementById("jobSalary").value.trim(),
+            duration: document.getElementById("jobDuration").value.trim(),
+            seats: Number(document.getElementById("jobSeats").value),
+            mode: document.getElementById("jobMode").value,
+            availability: document.getElementById("jobAvailability").value
+        };
+
+        if (!job.title || !job.description || !job.salary ||
+            !job.duration || job.seats < 1 || !job.mode) {
+            alert("Please fill all details correctly.");
+            return;
+        }
+
+        internships.push(job);
+        localStorage.setItem("internships", JSON.stringify(internships));
+
+        alert("Internship published successfully!");
+
+        document.getElementById("internshipForm").reset();
+
+        showInternships();
+    });
+
+    // DISPLAY INTERNSHIPS
+    function showInternships() {
+        const internships = JSON.parse(localStorage.getItem("internships")) || [];
+        const list = document.getElementById("internshipList");
+
+        list.innerHTML = "";
+
+        if (internships.length === 0) {
+            list.textContent = "No internships added yet.";
+            return;
+        }
+
+        internships.forEach(job => {
+            const card = document.createElement("div");
+            card.className = "job-card";
+
+            const title = document.createElement("h3");
+            title.textContent = job.title;
+
+            const description = document.createElement("p");
+            description.textContent = job.description;
+
+            const salary = document.createElement("p");
+            salary.textContent = "Salary: " + job.salary;
+
+            const duration = document.createElement("p");
+            duration.textContent = "Duration: " + job.duration;
+
+            const seats = document.createElement("p");
+            seats.textContent = "Available Seats: " + job.seats;
+
+            const mode = document.createElement("p");
+            mode.textContent = "Work Mode: " + job.mode;
+
+            const status = document.createElement("span");
+            status.className = "status" +
+                (job.availability === "Closed" ? " closed" : "");
+            status.textContent = job.availability;
+
+            const toggle = document.createElement("button");
+            toggle.textContent = job.availability === "Available"
+                ? "Close Internship" : "Reopen Internship";
+
+            toggle.onclick = function() {
+                changeAvailability(job.id);
+            };
+
+            const remove = document.createElement("button");
+            remove.className = "delete-btn";
+            remove.textContent = "Delete Internship";
+
+            remove.onclick = function() {
+                deleteInternship(job.id);
+            };
+
+            card.append(title, description, salary, duration,
+                        seats, mode, status, toggle, remove);
+
+            list.appendChild(card);
+        });
+    }
+
+    // CHANGE AVAILABILITY
+    function changeAvailability(id) {
+        let internships = JSON.parse(localStorage.getItem("internships")) || [];
+
+        internships = internships.map(job => {
+            if (job.id === id) {
+                job.availability =
+                    job.availability === "Available" ? "Closed" : "Available";
+            }
+            return job;
+        });
+
+        localStorage.setItem("internships", JSON.stringify(internships));
+        showInternships();
+    }
+
+    // DELETE INTERNSHIP
+    function deleteInternship(id) {
+        if (!confirm("Are you sure you want to delete this internship?")) {
+            return;
+        }
+
+        let internships = JSON.parse(localStorage.getItem("internships")) || [];
+
+        internships = internships.filter(job => job.id !== id);
+
+        localStorage.setItem("internships", JSON.stringify(internships));
+        showInternships();
+    }
+
+    // DISPLAY STUDENT APPLICATIONS
+    function showApplications() {
+        const applications = JSON.parse(localStorage.getItem("applications")) || [];
+        const table = document.getElementById("applicationTable");
+
+        table.innerHTML = "";
+
+        if (applications.length === 0) {
+            const row = document.createElement("tr");
+            const cell = document.createElement("td");
+            cell.colSpan = 5;
+            cell.textContent = "No student applications yet.";
+            row.appendChild(cell);
+            table.appendChild(row);
+            return;
+        }
+
+        applications.forEach((app, index) => {
+            const row = document.createElement("tr");
+
+            [app.name, app.email, app.internship, app.status || "Pending"]
+                .forEach(value => {
+                    const cell = document.createElement("td");
+                    cell.textContent = value || "";
+                    row.appendChild(cell);
+                });
+
+            const actionCell = document.createElement("td");
+
+            const approve = document.createElement("button");
+            approve.className = "approve-btn";
+            approve.textContent = "Approve";
+            approve.onclick = () => updateStatus(index, "Approved");
+
+            const reject = document.createElement("button");
+            reject.className = "reject-btn";
+            reject.textContent = "Reject";
+            reject.onclick = () => updateStatus(index, "Rejected");
+
+            actionCell.append(approve, reject);
+            row.appendChild(actionCell);
+
+            table.appendChild(row);
+        });
+    }
+
+    // UPDATE APPLICATION STATUS
+    function updateStatus(index, status) {
+        let applications = JSON.parse(localStorage.getItem("applications")) || [];
+
+        if (!applications[index]) return;
+
+        applications[index].status = status;
+
+        localStorage.setItem("applications", JSON.stringify(applications));
+
+        showApplications();
+        alert("Application status updated to " + status);
+    }
+
+    showInternships();
+    showApplications();
+</script>
+
+</body>
+</html>
